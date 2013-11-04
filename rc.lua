@@ -276,7 +276,7 @@ if whereis_app('curl') and whereis_app('mpd') then
 			if args["{state}"] == "Stop" or args["{state}"] == "Pause" or args["{state}"] == "N/A"
 				or (args["{Artist}"] == "N/A" and args["{Title}"] == "N/A") then return ""
 			else return '<span color="white">музыка:</span> '..
-			     args["{Artist}"]..' - '.. args["{Title}"]
+           args["{Artist}"]..' - '.. args["{Title}"]
 			end
 		end
 	)
@@ -506,7 +506,7 @@ awful.rules.rules = {
   { rule = { class = "Emacs" },
     properties = { tag = tags[1][2] } },
   { rule = { class = "Firefox" },
-    properties = { tag = tags[1][3], opacity = 0.7 } },
+    properties = { tag = tags[1][3] } },
   { rule = { class = "Gimp" },
     properties = { tag = tags[1][4], floating = true} },
   { rule = { class = "Mplayer" },
