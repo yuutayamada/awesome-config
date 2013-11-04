@@ -28,11 +28,7 @@ editor = os.getenv("EDITOR") or "vim"
 editor_cmd = terminal .. " -e " .. editor
 
 wallpaper_app = "feh" -- if you want to check for app before trying
-wallpaper_dir = os.getenv("HOME") .. "/Pictures/Wallpaper" -- wallpaper dir
-
--- taglist numerals
---- arabic, chinese, {east|persian}_arabic, roman, thai, random
-taglist_numbers = "chinese" -- we support arabic (1,2,3...),
+wallpaper_dir = os.getenv("HOME") .. "/Pictures/wallpaper" -- wallpaper dir
 
 cpugraph_enable = true -- Show CPU graph
 cputext_format = " $1%" -- %1 average cpu, %[2..] every other thread individually
@@ -52,7 +48,8 @@ require_safe('personal')
 -- }}}
 
 -- {{{ Variable definitions
-local wallpaper_cmd = "find " .. wallpaper_dir .. " -type f -name '*.jpg'  -print0 | shuf -n1 -z | xargs -0 feh --bg-scale"
+local wallpaper_cmd = "find " .. wallpaper_dir .. " -type f \\( -name '*.jpg' -o -name '*.png' \\) -print0 | shuf -n1 -z | xargs -0 feh --bg-scale"
+
 local home   = os.getenv("HOME")
 local exec   = awful.util.spawn
 local sexec  = awful.util.spawn_with_shell
@@ -65,44 +62,25 @@ layouts = {
   awful.layout.suit.tile,
   awful.layout.suit.tile.bottom,
   awful.layout.suit.tile.top,
-  --awful.layout.suit.fair,
+  awful.layout.suit.fair,
   awful.layout.suit.max,
   awful.layout.suit.magnifier,
-  --awful.layout.suit.floating
+  awful.layout.suit.floating
 }
 -- }}}
 
 -- {{{ Tags
+tags = {
+  names  = { "☆", "✍", "☁", "✐", "♪", '✆', '✇', '☺', '✉' },
+  layout = { layouts[5], layouts[5], layouts[5], layouts[4], layouts[5],
+             layouts[6], layouts[7], layouts[6], layouts[5]
+}}
 
--- Taglist numerals
-taglist_numbers_langs = { 'arabic', 'chinese', 'traditional_chinese', 'east_arabic', 'persian_arabic', }
-taglist_numbers_sets = {
-	arabic={ 1, 2, 3, 4, 5, 6, 7, 8, 9 },
-	chinese={"一", "二", "三", "四", "五", "六", "七", "八", "九", "十"},
-	traditional_chinese={"壹", "貳", "叄", "肆", "伍", "陸", "柒", "捌", "玖", "拾"},
-	east_arabic={'١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'}, -- '٠' 0
-	persian_arabic={'٠', '١', '٢', '٣', '۴', '۵', '۶', '٧', '٨', '٩'},
-	roman={'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'},
-	thai={'๑', '๒', '๓', '๔', '๕', '๖', '๗', '๘', '๙', '๑๐'},
-}
--- }}}
-
-tags = {}
 for s = 1, screen.count() do
-    -- Each screen has its own tag table.
-      --tags[s] = awful.tag({"一", "二", "三", "四", "五", "六", "七", "八", "九", "十"}, s, layouts[1])
-      --tags[s] = awful.tag(taglist_numbers_sets[taglist_numbers], s, layouts[1])
-	if taglist_numbers == 'random' then
-		math.randomseed(os.time())
-		local taglist = taglist_numbers_sets[taglist_numbers_langs[math.random(table.getn(taglist_numbers_langs))]]
-		tags[s] = awful.tag(taglist, s, layouts[1])
-	else
-		tags[s] = awful.tag(taglist_numbers_sets[taglist_numbers], s, layouts[1])
-	end
-    --tags[s] = awful.tag({ 1, 2, 3, 4, 5, 6, 7, 8, 9 }, s, layouts[1])
+  -- Each screen has its own tag table.
+  tags[s] = awful.tag(tags.names, s, tags.layout)
 end
 -- }}}
-
 
 -- {{{ Wibox
 --
@@ -124,18 +102,18 @@ cpuicon.image = image(beautiful.widget_cpu)
 
 -- check for cpugraph_enable == true in config
 if cpugraph_enable then
-	-- Initialize widget
-	cpugraph  = awful.widget.graph()
+  -- Initialize widget
+  cpugraph  = awful.widget.graph()
 
-	-- Graph properties
-	cpugraph:set_width(40):set_height(16)
-	cpugraph:set_background_color(beautiful.fg_off_widget)
-	cpugraph:set_gradient_angle(0):set_gradient_colors({
-	   beautiful.fg_end_widget, beautiful.fg_center_widget, beautiful.fg_widget
-	})
+  -- Graph properties
+  cpugraph:set_width(40):set_height(16)
+  cpugraph:set_background_color(beautiful.fg_off_widget)
+  cpugraph:set_gradient_angle(0):set_gradient_colors({
+   beautiful.fg_end_widget, beautiful.fg_center_widget, beautiful.fg_widget
+  })
 
-	-- Register graph widget
-	vicious.register(cpugraph,  vicious.widgets.cpu,      "$1")
+  -- Register graph widget
+  vicious.register(cpugraph,  vicious.widgets.cpu,      "$1")
 end
 
 -- cpu text widget
@@ -145,14 +123,14 @@ vicious.register(cpuwidget, vicious.widgets.cpu, cputext_format, 3) -- register
 -- temperature
 tzswidget = widget({ type = "textbox" })
 vicious.register(tzswidget, vicious.widgets.thermal,
-	function (widget, args)
-		if args[1] > 0 then
-			tzfound = true
-			return " " .. args[1] .. "C°"
-		else return "" 
-		end
-	end
-	, 19, "thermal_zone0")
+  function (widget, args)
+    if args[1] > 0 then
+      tzfound = true
+      return " " .. args[1] .. "C°"
+    else return ""
+    end
+  end
+  , 19, "thermal_zone0")
 
 -- }}}
 
@@ -165,13 +143,13 @@ baticon = widget({ type = "imagebox" })
 
 -- Register widget
 vicious.register(batwidget, vicious.widgets.bat,
-	function (widget, args)
-		if args[2] == 0 then return ""
-		else
-			baticon.image = image(beautiful.widget_bat)
-			return "<span color='white'>".. args[2] .. "%</span>"
-		end
-	end, 61, "BAT0"
+  function (widget, args)
+    if args[2] == 0 then return ""
+    else
+      baticon.image = image(beautiful.widget_bat)
+      return "<span color='white'>".. args[2] .. "%</span>"
+    end
+  end, 61, "BAT0"
 )
 -- }}}
 
@@ -183,16 +161,16 @@ memicon = widget({ type = "imagebox" })
 memicon.image = image(beautiful.widget_mem)
 
 if membar_enable then
-	-- Initialize widget
-	membar = awful.widget.progressbar()
-	-- Pogressbar properties
-	membar:set_vertical(true):set_ticks(true)
-	membar:set_height(16):set_width(8):set_ticks_size(2)
-	membar:set_background_color(beautiful.fg_off_widget)
-	membar:set_gradient_colors({ beautiful.fg_widget,
-	   beautiful.fg_center_widget, beautiful.fg_end_widget
-	}) -- Register widget
-	vicious.register(membar, vicious.widgets.mem, "$1", 13)
+  -- Initialize widget
+  membar = awful.widget.progressbar()
+  -- Pogressbar properties
+  membar:set_vertical(true):set_ticks(true)
+  membar:set_height(16):set_width(8):set_ticks_size(2)
+  membar:set_background_color(beautiful.fg_off_widget)
+  membar:set_gradient_colors({ beautiful.fg_widget,
+                               beautiful.fg_center_widget, beautiful.fg_end_widget
+  }) -- Register widget
+  vicious.register(membar, vicious.widgets.mem, "$1", 13)
 end
 
 -- mem text output
@@ -228,9 +206,9 @@ vicious.register(fs.s, vicious.widgets.fs, "${/media/files used_p}", 599)
 
 -- {{{ Network usage
 function print_net(name, down, up)
-	return '<span color="'
-	.. beautiful.fg_netdn_widget ..'">' .. down .. '</span> <span color="'
-	.. beautiful.fg_netup_widget ..'">' .. up  .. '</span>'
+  return '<span color="'
+    .. beautiful.fg_netdn_widget ..'">' .. down .. '</span> <span color="'
+    .. beautiful.fg_netup_widget ..'">' .. up  .. '</span>'
 end
 
 dnicon = widget({ type = "imagebox" })
@@ -240,16 +218,16 @@ upicon = widget({ type = "imagebox" })
 netwidget = widget({ type = "textbox" })
 -- Register widget
 vicious.register(netwidget, vicious.widgets.net,
-	function (widget, args)
-		for _,device in pairs(networks) do
-			if tonumber(args["{".. device .." carrier}"]) > 0 then
-				netwidget.found = true
-				dnicon.image = image(beautiful.widget_net)
-				upicon.image = image(beautiful.widget_netup)
-				return print_net(device, args["{"..device .." down_kb}"], args["{"..device.." up_kb}"])
-			end
-		end
-	end, 3)
+  function (widget, args)
+    for _,device in pairs(networks) do
+      if tonumber(args["{".. device .." carrier}"]) > 0 then
+        netwidget.found = true
+        dnicon.image = image(beautiful.widget_net)
+        upicon.image = image(beautiful.widget_netup)
+        return print_net(device, args["{"..device .." down_kb}"], args["{"..device.." up_kb}"])
+      end
+    end
+  end, 3)
 -- }}}
 
 
@@ -389,74 +367,74 @@ clientbuttons = awful.util.table.join(
 
 -- {{{ Key bindings
 globalkeys = awful.util.table.join(
-    awful.key({ modkey,           }, "Left",   awful.tag.viewprev       ),
-    awful.key({ modkey,           }, "Right",  awful.tag.viewnext       ),
-    awful.key({ modkey,           }, "Escape", awful.tag.history.restore),
+  awful.key({ modkey }, "Down",  function () awful.client.moveresize(  0,  20,   0,   0) end),
+  awful.key({ modkey }, "Up",    function () awful.client.moveresize(  0, -20,   0,   0) end),
+  awful.key({ modkey }, "Left",  function () awful.client.moveresize(-20,   0,   0,   0) end),
+  awful.key({ modkey }, "Right", function () awful.client.moveresize( 20,   0,   0,   0) end),
 
-    awful.key({ modkey,           }, "j",
-        function ()
-            awful.client.focus.byidx( 1)
-            if client.focus then client.focus:raise() end
-        end),
-    awful.key({ modkey,           }, "k",
-        function ()
-            awful.client.focus.byidx(-1)
-            if client.focus then client.focus:raise() end
-        end),
-    awful.key({ modkey,           }, "w", function () mymainmenu:show({keygrabber=true}) end),
+  awful.key({ modkey,           }, "Escape", awful.tag.history.restore),
 
-    -- Layout manipulation
-    awful.key({ modkey, "Shift"   }, "j", function () awful.client.swap.byidx(  1)    end),
-    awful.key({ modkey, "Shift"   }, "k", function () awful.client.swap.byidx( -1)    end),
-    awful.key({ modkey, "Control" }, "j", function () awful.screen.focus_relative( 1) end),
-    awful.key({ modkey, "Control" }, "k", function () awful.screen.focus_relative(-1) end),
-    awful.key({ modkey,           }, "u", awful.client.urgent.jumpto),
-    awful.key({ modkey,           }, "Tab",
-        function ()
-            awful.client.focus.history.previous()
-            if client.focus then
+  awful.key({ modkey,           }, "j",
+            function ()
+              awful.client.focus.byidx( 1)
+              if client.focus then client.focus:raise() end
+  end),
+  awful.key({ modkey,           }, "k",
+            function ()
+              awful.client.focus.byidx(-1)
+              if client.focus then client.focus:raise() end
+  end),
+  awful.key({ modkey,           }, "w", function () mymainmenu:show({keygrabber=true}) end),
+
+  -- Layout manipulation
+  awful.key({ modkey, "Shift"   }, "j", function () awful.client.swap.byidx(  1)    end),
+  awful.key({ modkey, "Shift"   }, "k", function () awful.client.swap.byidx( -1)    end),
+  awful.key({ modkey, "Control" }, "j", function () awful.screen.focus_relative( 1) end),
+  awful.key({ modkey, "Control" }, "k", function () awful.screen.focus_relative(-1) end),
+  awful.key({ modkey,           }, "u", awful.client.urgent.jumpto),
+  awful.key({ modkey,           }, "Tab",
+            function ()
+              awful.client.focus.history.previous()
+              if client.focus then
                 client.focus:raise()
-            end
-        end),
+              end
+  end),
 
-    -- Standard program
-    awful.key({ modkey, "Shift"   }, "Return", function () awful.util.spawn(terminal) end),
-    awful.key({ modkey, "Control" }, "r", awesome.restart),
-    awful.key({ modkey, "Shift"   }, "q", awesome.quit),
+  -- Standard program
+  awful.key({ modkey, "Shift"   }, "Return", function () awful.util.spawn(terminal) end),
+  awful.key({ altkey, "Control" }, "t",     function () awful.util.spawn(terminal) end),
+  awful.key({ modkey, "Control" }, "r", awesome.restart),
+  awful.key({ modkey, "Shift"   }, "q", awesome.quit),
 
-    awful.key({ modkey,           }, "l",     function () awful.tag.incmwfact( 0.05)    end),
-    awful.key({ modkey,           }, "h",     function () awful.tag.incmwfact(-0.05)    end),
-    awful.key({ modkey,           }, ",",     function () awful.tag.incnmaster( 1)      end),
-    awful.key({ modkey,           }, ".",     function () awful.tag.incnmaster(-1)      end),
-    awful.key({ modkey, "Control" }, "h",     function () awful.tag.incncol( 1)         end),
-    awful.key({ modkey, "Control" }, "l",     function () awful.tag.incncol(-1)         end),
-    awful.key({ modkey,           }, "space", function () awful.layout.inc(layouts,  1) end),
-    awful.key({ modkey, "Shift"   }, "space", function () awful.layout.inc(layouts, -1) end),
+  awful.key({ modkey,           }, "l",     function () awful.tag.incmwfact( 0.05)    end),
+  awful.key({ modkey,           }, "h",     function () awful.tag.incmwfact(-0.05)    end),
+  awful.key({ modkey,           }, ",",     function () awful.tag.incnmaster( 1)      end),
+  awful.key({ modkey,           }, ".",     function () awful.tag.incnmaster(-1)      end),
+  awful.key({ modkey, "Control" }, "h",     function () awful.tag.incncol( 1)         end),
+  awful.key({ modkey, "Control" }, "l",     function () awful.tag.incncol(-1)         end),
+  awful.key({ modkey,           }, "space", function () awful.layout.inc(layouts,  1) end),
+  awful.key({ modkey, "Shift"   }, "space", function () awful.layout.inc(layouts, -1) end),
 
-    awful.key({ modkey }, "b", function ()
-         wibox[mouse.screen].visible = not wibox[mouse.screen].visible
-    end),
+  awful.key({ modkey }, "b", function ()
+              wibox[mouse.screen].visible = not wibox[mouse.screen].visible
+  end),
 
-    -- Prompt
-    awful.key({ modkey },            "r",     function () promptbox[mouse.screen]:run() end),
+  -- Prompt
+  awful.key({ modkey },            "r",     function () promptbox[mouse.screen]:run() end),
 
-    awful.key({ modkey }, "x",
-              function ()
-                  awful.prompt.run({ prompt = "Run Lua code: " },
-                  mypromptbox[mouse.screen].widget,
-                  awful.util.eval, nil,
-                  awful.util.getdir("cache") .. "/history_eval")
-              end)
+  awful.key({ modkey }, "x",
+            function ()
+              awful.prompt.run({ prompt = "Run Lua code: " },
+                               mypromptbox[mouse.screen].widget,
+                               awful.util.eval, nil,
+                               awful.util.getdir("cache") .. "/history_eval")
+  end)
 )
 
 clientkeys = awful.util.table.join(
     awful.key({ modkey,           }, "f",      function (c) c.fullscreen = not c.fullscreen  end),
     awful.key({ modkey, "Shift"   }, "c",      function (c) c:kill()                         end),
     awful.key({ modkey,           }, "t",  awful.client.floating.toggle                     ),
-    awful.key({ modkey, "Shift" }, "t", function (c)
-        if   c.titlebar then awful.titlebar.remove(c)
-           else awful.titlebar.add(c, { modkey = modkey }) end
-    end),
     awful.key({ modkey,           }, "Return", function (c) c:swap(awful.client.getmaster()) end),
     awful.key({ modkey,           }, "o",      awful.client.movetoscreen                        ),
     awful.key({ modkey, "Shift"   }, "r",      function (c) c:redraw()                       end),
@@ -518,16 +496,23 @@ root.keys(globalkeys)
 
 -- {{{ Rules
 awful.rules.rules = {
-    { rule = { }, properties = {
+  { rule = { },
+    properties = {
       focus = true,      size_hints_honor = false,
       keys = clientkeys, buttons = clientbuttons,
       border_width = beautiful.border_width,
       border_color = beautiful.border_normal }
-    },
-    { rule = { class = "ROX-Filer" },   properties = { floating = true } },
-    { rule = { class = "Chromium-browser" },   properties = { floating = false } },
-    { rule = { class = "Google-chrome" },   properties = { floating = false } },
-    { rule = { class = "Firefox" },   properties = { floating = false } },
+  },
+  { rule = { class = "Emacs" },
+    properties = { tag = tags[1][2] } },
+  { rule = { class = "Firefox" },
+    properties = { tag = tags[1][3], opacity = 0.7 } },
+  { rule = { class = "Gimp" },
+    properties = { tag = tags[1][4], floating = true} },
+  { rule = { class = "Mplayer" },
+    properties = { tag = tags[1][5], floating = true} },
+  { rule = { class = "Skype" },
+    properties = { tag = tags[1][6], floating = true, opacity = 0.7 } },
 }
 -- }}}
 
@@ -592,7 +577,7 @@ mytimer:add_signal("timeout", function()
 
   -- tell awsetbg to randomly choose a wallpaper from your wallpaper directory
   if file_exists(wallpaper_dir) and whereis_app('feh') then
-	  os.execute(wallpaper_cmd)
+    os.execute(wallpaper_cmd)
   end
   -- stop the timer (we don't need multiple instances running at the same time)
   mytimer:stop()
