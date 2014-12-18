@@ -9,7 +9,9 @@
 -- }}}
 
 
--- {{{ Libraries
+---------------
+-- Libraries --
+---------------
 require("awful")
 require("awful.rules")
 require("awful.autofocus")
@@ -17,9 +19,10 @@ require("naughty")
 -- User libraries
 require("vicious") -- ./vicious
 require("helpers") -- helpers.lua
--- }}}
 
--- {{{ Default configuration
+---------------------------
+-- Default configuration --
+---------------------------
 altkey = "Mod1"
 modkey = "Mod4" -- your windows/apple key
 
@@ -28,7 +31,7 @@ editor = os.getenv("EDITOR") or "vim"
 editor_cmd = terminal .. " -e " .. editor
 
 wallpaper_app = "feh" -- if you want to check for app before trying
-wallpaper_dir = os.getenv("HOME") .. "/Pictures/wallpaper" -- wallpaper dir
+wallpaper_dir = os.getenv("HOME") .. "/media/pictures/wallpaper" -- wallpaper dir
 
 cpugraph_enable = true -- Show CPU graph
 cputext_format = " $1%" -- %1 average cpu, %[2..] every other thread individually
@@ -44,20 +47,24 @@ require_safe('personal')
 
 -- Create personal.lua in this same directory to override these defaults
 
-
--- }}}
-
--- {{{ Variable definitions
+--------------------------
+-- Variable definitions --
+--------------------------
 local wallpaper_cmd = "find " .. wallpaper_dir .. " -type f \\( -name '*.jpg' -o -name '*.png' \\) -print0 | shuf -n1 -z | xargs -0 feh --bg-scale"
+
 
 local home   = os.getenv("HOME")
 local exec   = awful.util.spawn
 local sexec  = awful.util.spawn_with_shell
 
--- Beautiful theme
+---------------------
+-- Beautiful theme --
+---------------------
 beautiful.init(awful.util.getdir("config") .. "/themes/zhongguo/zhongguo.lua")
 
--- Window management layouts
+-------------------------------
+-- Window management layouts --
+-------------------------------
 layouts = {
   awful.layout.suit.tile,
   awful.layout.suit.tile.bottom,
@@ -67,9 +74,10 @@ layouts = {
   awful.layout.suit.magnifier,
   awful.layout.suit.floating
 }
--- }}}
 
--- {{{ Tags
+----------
+-- Tags --
+----------
 tags = {
   names  = { "☆", "✍", "☁", "✐", "♪", '✆', '✇', '☺', '✉' },
   layout = { layouts[5], layouts[5], layouts[5], layouts[4], layouts[5],
@@ -80,21 +88,23 @@ for s = 1, screen.count() do
   -- Each screen has its own tag table.
   tags[s] = awful.tag(tags.names, s, tags.layout)
 end
--- }}}
 
--- {{{ Wibox
---
--- {{{ Widgets configuration
---
--- {{{ Reusable separator
+-----------
+-- Wibox --
+-----------
+------------------------
+-- Reusable separator --
+------------------------
 separator = widget({ type = "imagebox" })
 separator.image = image(beautiful.widget_sep)
 
 spacer = widget({ type = "textbox" })
 spacer.width = 3
--- }}}
 
--- {{{ CPU usage
+
+---------------
+-- CPU usage --
+---------------
 
 -- cpu icon
 cpuicon = widget({ type = "imagebox" })
@@ -132,11 +142,10 @@ vicious.register(tzswidget, vicious.widgets.thermal,
   end
   , 19, "thermal_zone0")
 
--- }}}
 
-
--- {{{ Battery state
-
+-------------------
+-- Battery state --
+-------------------
 -- Initialize widget
 batwidget = widget({ type = "textbox" })
 baticon = widget({ type = "imagebox" })
@@ -151,11 +160,10 @@ vicious.register(batwidget, vicious.widgets.bat,
     end
   end, 61, "BAT0"
 )
--- }}}
 
-
--- {{{ Memory usage
-
+------------------
+-- Memory usage --
+------------------
 -- icon
 memicon = widget({ type = "imagebox" })
 memicon.image = image(beautiful.widget_mem)
@@ -176,9 +184,11 @@ end
 -- mem text output
 memtext = widget({ type = "textbox" })
 vicious.register(memtext, vicious.widgets.mem, memtext_format, 13)
--- }}}
 
--- {{{ File system usage
+
+-----------------------
+-- File system usage --
+-----------------------
 fsicon = widget({ type = "imagebox" })
 fsicon.image = image(beautiful.widget_fs)
 -- Initialize widgets
@@ -202,9 +212,10 @@ vicious.cache(vicious.widgets.fs)
 -- Register widgets
 vicious.register(fs.r, vicious.widgets.fs, "${/ used_p}",            599)
 vicious.register(fs.s, vicious.widgets.fs, "${/media/files used_p}", 599)
--- }}}
 
--- {{{ Network usage
+-------------------
+-- Network usage --
+-------------------
 function print_net(name, down, up)
   return '<span color="'
     .. beautiful.fg_netdn_widget ..'">' .. down .. '</span> <span color="'
@@ -217,22 +228,21 @@ upicon = widget({ type = "imagebox" })
 -- Initialize widget
 netwidget = widget({ type = "textbox" })
 -- Register widget
-vicious.register(netwidget, vicious.widgets.net,
-  function (widget, args)
-    for _,device in pairs(networks) do
-      if tonumber(args["{".. device .." carrier}"]) > 0 then
-        netwidget.found = true
-        dnicon.image = image(beautiful.widget_net)
-        upicon.image = image(beautiful.widget_netup)
-        return print_net(device, args["{"..device .." down_kb}"], args["{"..device.." up_kb}"])
-      end
-    end
-  end, 3)
--- }}}
+-- vicious.register(netwidget, vicious.widgets.net,
+--   function (widget, args)
+--     for _,device in pairs(networks) do
+--       if tonumber(args["{".. device .." carrier}"]) > 0 then
+--         netwidget.found = true
+--         dnicon.image = image(beautiful.widget_net)
+--         upicon.image = image(beautiful.widget_netup)
+--         return print_net(device, args["{"..device .." down_kb}"], args["{"..device.." up_kb}"])
+--       end
+--     end
+--   end, 3)
 
-
-
--- {{{ Volume level
+------------------
+-- Volume level --
+------------------
 volicon = widget({ type = "imagebox" })
 volicon.image = image(beautiful.widget_vol)
 -- Initialize widgets
@@ -256,19 +266,20 @@ volbar.widget:buttons(awful.util.table.join(
    awful.button({ }, 5, function () exec("amixer -q set PCM 2dB-", false) vicious.force({volbar, volwidget}) end)
 )) -- Register assigned buttons
 volwidget:buttons(volbar.widget:buttons())
--- }}}
 
--- {{{ Date and time
+-------------------
+-- Date and time --
+-------------------
 dateicon = widget({ type = "imagebox" })
 dateicon.image = image(beautiful.widget_date)
 -- Initialize widget
 datewidget = widget({ type = "textbox" })
 -- Register widget
 vicious.register(datewidget, vicious.widgets.date, date_format, 61)
--- }}}
 
--- {{{ mpd
-
+---------
+-- mpd --
+---------
 if whereis_app('curl') and whereis_app('mpd') then
 	mpdwidget = widget({ type = "textbox" })
 	vicious.register(mpdwidget, vicious.widgets.mpd,
@@ -282,15 +293,15 @@ if whereis_app('curl') and whereis_app('mpd') then
 	)
 end
 
--- }}}
 
-
--- {{{ System tray
+-----------------
+-- System tray --
+-----------------
 systray = widget({ type = "systray" })
--- }}}
--- }}}
 
--- {{{ Wibox initialisation
+--------------------------
+-- Wibox initialisation --
+--------------------------
 wibox     = {}
 promptbox = {}
 layoutbox = {}
@@ -346,11 +357,10 @@ for s = 1, screen.count() do
         ["layout"] = awful.widget.layout.horizontal.rightleft
     }
 end
--- }}}
--- }}}
 
-
--- {{{ Mouse bindings
+--------------------
+-- Mouse bindings --
+--------------------
 root.buttons(awful.util.table.join(
     awful.button({ }, 4, awful.tag.viewnext),
     awful.button({ }, 5, awful.tag.viewprev)
@@ -362,10 +372,10 @@ clientbuttons = awful.util.table.join(
     awful.button({ modkey }, 1, awful.mouse.client.move),
     awful.button({ modkey }, 3, awful.mouse.client.resize)
 )
--- }}}
 
-
--- {{{ Key bindings
+------------------
+-- Key bindings --
+------------------
 globalkeys = awful.util.table.join(
   awful.key({ modkey }, "Down",  function () awful.client.moveresize(  0,  20,   0,   0) end),
   awful.key({ modkey }, "Up",    function () awful.client.moveresize(  0, -20,   0,   0) end),
@@ -420,14 +430,13 @@ globalkeys = awful.util.table.join(
   end),
 
   -- Prompt
-  awful.key({ modkey },            "r",     function () promptbox[mouse.screen]:run() end),
-
-  awful.key({ modkey }, "x",
-            function ()
-              awful.prompt.run({ prompt = "Run Lua code: " },
-                               mypromptbox[mouse.screen].widget,
-                               awful.util.eval, nil,
-                               awful.util.getdir("cache") .. "/history_eval")
+  awful.key({ modkey }, "r", function () promptbox[mouse.screen]:run() end),
+  -- awful.key({ modkey }, "r", function () awful.util.spawn( "dmenu_with_alias" ) end),
+  awful.key({ modkey }, "x", function ()
+      awful.prompt.run({ prompt = "Run Lua code: " },
+        mypromptbox[mouse.screen].widget,
+        awful.util.eval, nil,
+        awful.util.getdir("cache") .. "/history_eval")
   end)
 )
 
@@ -491,10 +500,11 @@ clientbuttons = awful.util.table.join(
 
 -- Set keys
 root.keys(globalkeys)
--- }}}
 
 
--- {{{ Rules
+-----------
+-- Rules --
+-----------
 awful.rules.rules = {
   { rule = { },
     properties = {
@@ -504,9 +514,9 @@ awful.rules.rules = {
       border_color = beautiful.border_normal }
   },
   { rule = { class = "Emacs" },
-    properties = { tag = tags[1][2] } },
+    properties = { tag = tags[1][2], opacity = 0.7 } },
   { rule = { class = "Firefox" },
-    properties = { tag = tags[1][3] } },
+    properties = { tag = tags[1][3], opacity = 0.8 } },
   { rule = { class = "Gimp" },
     properties = { tag = tags[1][4], floating = true} },
   { rule = { class = "Mplayer" },
@@ -514,12 +524,11 @@ awful.rules.rules = {
   { rule = { class = "Skype" },
     properties = { tag = tags[1][6], floating = true, opacity = 0.7 } },
 }
--- }}}
 
-
--- {{{ Signals
---
--- {{{ Manage signal handler
+-------------
+-- Signals --
+-------------
+-- Manage signal handler
 client.add_signal("manage", function (c, startup)
     -- Add titlebar to floaters, but remove those from rule callback
     if awful.client.floating.get(c)
@@ -547,14 +556,16 @@ client.add_signal("manage", function (c, startup)
         end
     end
 end)
--- }}}
 
--- {{{ Focus signal handlers
+---------------------------
+-- Focus signal handlers --
+---------------------------
 client.add_signal("focus",   function (c) c.border_color = beautiful.border_focus  end)
 client.add_signal("unfocus", function (c) c.border_color = beautiful.border_normal end)
--- }}}
 
--- {{{ Arrange signal handler
+----------------------------
+-- Arrange signal handler --
+----------------------------
 for s = 1, screen.count() do screen[s]:add_signal("arrange", function ()
     local clients = awful.client.visible(s)
     local layout = awful.layout.getname(awful.layout.get(s))
@@ -566,12 +577,11 @@ for s = 1, screen.count() do screen[s]:add_signal("arrange", function ()
     end
   end)
 end
--- }}}
--- }}}
 
+---------------------
+-- setup the timer --
+---------------------
 x = 0
-
--- setup the timer
 mytimer = timer { timeout = x }
 mytimer:add_signal("timeout", function()
 
