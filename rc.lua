@@ -81,39 +81,9 @@ layouts = {
 -- }}}
 
 -- -- {{{ Tags
-
--- -- Taglist numerals
--- taglist_numbers_langs = { 'arabic', 'chinese', 'traditional_chinese', 'east_arabic', 'persian_arabic', }
--- taglist_numbers_sets = {
---    arabic={ 1, 2, 3, 4, 5, 6, 7, 8, 9 },
---    chinese={"一", "二", "三", "四", "五", "六", "七", "八", "九", "十"},
---    traditional_chinese={"壹", "貳", "叄", "肆", "伍", "陸", "柒", "捌", "玖", "拾"},
---    east_arabic={'١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'}, -- '٠' 0
---    persian_arabic={'٠', '١', '٢', '٣', '۴', '۵', '۶', '٧', '٨', '٩'},
---    roman={'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'},
---    thai={'๑', '๒', '๓', '๔', '๕', '๖', '๗', '๘', '๙', '๑๐'},
--- }
--- -- }}}
-
--- tags = {}
--- for s = 1, screen.count() do
---     -- Each screen has its own tag table.
---       --tags[s] = awful.tag({"一", "二", "三", "四", "五", "六", "七", "八", "九", "十"}, s, layouts[1])
---       --tags[s] = awful.tag(taglist_numbers_sets[taglist_numbers], s, layouts[1])
---    if taglist_numbers == 'random' then
---      math.randomseed(os.time())
---      local taglist = taglist_numbers_sets[taglist_numbers_langs[math.random(table.getn(taglist_numbers_langs))]]
---      tags[s] = awful.tag(taglist, s, layouts[1])
---    else
---      tags[s] = awful.tag(taglist_numbers_sets[taglist_numbers], s, layouts[1])
---    end
---     --tags[s] = awful.tag({ 1, 2, 3, 4, 5, 6, 7, 8, 9 }, s, layouts[1])
--- end
--- -- }}}
-
-----------
--- Tags --
-----------
+-- ----------
+-- -- Tags --
+-- ----------
 tags = {
   names  = { "☆", "✍", "☁", "✐", "♪", '✆', '✇', '☺', '✉' },
   layout = { layouts[5], layouts[5], layouts[5], layouts[4], layouts[5],
