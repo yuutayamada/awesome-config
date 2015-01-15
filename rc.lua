@@ -233,9 +233,9 @@ vicious.register(fs.s, vicious.widgets.fs, "${/media/files used_p}", 599)
 
 -- {{{ Network usage
 function print_net(name, down, up)
-	return '<span color="'
-	.. beautiful.fg_netdn_widget ..'">' .. down .. '</span> <span color="'
-	.. beautiful.fg_netup_widget ..'">' .. up  .. '</span>'
+  return '<span color="'
+    .. beautiful.fg_netdn_widget ..'">' .. down .. '</span> <span color="'
+    .. beautiful.fg_netup_widget ..'">' .. up  .. '</span>'
 end
 
 dnicon = wibox.widget.imagebox()
