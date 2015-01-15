@@ -245,16 +245,19 @@ upicon = wibox.widget.imagebox()
 netwidget = wibox.widget.textbox()
 -- Register widget
 vicious.register(netwidget, vicious.widgets.net,
-	function (widget, args)
-		for _,device in pairs(networks) do
-			if tonumber(args["{".. device .." carrier}"]) > 0 then
-				netwidget.found = true
-				dnicon:set_image(beautiful.widget_net)
-				upicon:set_image(beautiful.widget_netup)
-				return print_net(device, args["{"..device .." down_kb}"], args["{"..device.." up_kb}"])
-			end
-		end
-	end, 3)
+                 function (widget, args)
+                   for _, device in pairs(networks) do
+                     local n = tonumber(args["{".. device .." carrier}"])
+                     if n ~= nil and n > 0 then
+                       netwidget.found = true
+                       dnicon:set_image(beautiful.widget_net)
+                       upicon:set_image(beautiful.widget_netup)
+                       return print_net(device,
+                                        args["{"..device.." down_kb}"],
+                                        args["{"..device.." up_kb}"])
+                     end
+                   end
+                 end, 3)
 -- }}}
 
 
