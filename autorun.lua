@@ -1,4 +1,3 @@
-run_once("sh " .. os.getenv("HOME") .. "/.config/awesome/autorun.sh")
 run_once("nm-applet") -- networking
 run_once(os.getenv("HOME") .. "/.dropbox-dist/dropboxd") -- Dropbox
 run_once("xsetroot", "-cursor_name left_ptr")  -- sets the cursor icon
