@@ -260,8 +260,6 @@ vicious.register(netwidget, vicious.widgets.net,
                  end, 3)
 -- }}}
 
-
-
 -- {{{ Volume level
 volicon = wibox.widget.imagebox()
 volicon:set_image(beautiful.widget_vol)
