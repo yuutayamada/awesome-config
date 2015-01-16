@@ -1,6 +1,6 @@
 -- {{{ License
 --
--- Awesome configuration, using awesome 3.4.10 on Ubuntu 11.10
+-- Awesome configuration, using awesome 3.4.10 -> 3.5.x on Ubuntu 11.10->14.10
 --   * Tony N <tony@git-pull.com>
 --
 -- This work is licensed under the Creative Commons Attribution-Share
@@ -16,6 +16,10 @@ naughty = require("naughty")
 beautiful = require("beautiful")
 wibox = require("wibox")
 
+-- http://awesome.naquadah.org/wiki/Menubar/3.5
+-- menubar configuration
+local menubar = require("menubar")
+
 -- User libraries
 local vicious = require("vicious") -- ./vicious
 local helpers = require("helpers") -- helpers.lua
@@ -25,16 +29,16 @@ local helpers = require("helpers") -- helpers.lua
 altkey = "Mod1"
 modkey = "Mod4" -- your windows/apple key
 
-terminal = whereis_app('urxvtcd') and 'urxvtcd' or 'x-terminal-emulator' -- also accepts full path
+terminal = whereis_app('xterm') and 'xterm' or 'x-terminal-emulator' -- also accepts full path
 editor = os.getenv("EDITOR") or "vim"
 editor_cmd = terminal .. " -e " .. editor
 
 wallpaper_app = "feh" -- if you want to check for app before trying
-wallpaper_dir = os.getenv("HOME") .. "/Pictures/Wallpaper" -- wallpaper dir
+wallpaper_dir = os.getenv("HOME") .. "/media/pictures/wallpaper" -- wallpaper dir
 
--- taglist numerals
---- arabic, chinese, {east|persian}_arabic, roman, thai, random
-taglist_numbers = "chinese" -- we support arabic (1,2,3...),
+-- -- taglist numerals
+-- --- arabic, chinese, {east|persian}_arabic, roman, thai, random
+-- taglist_numbers = "chinese" -- we support arabic (1,2,3...),
 
 cpugraph_enable = true -- Show CPU graph
 cputext_format = " $1%" -- %1 average cpu, %[2..] every other thread individually
@@ -46,6 +50,9 @@ date_format = "%a %m/%d/%Y %l:%M%p" -- refer to http://en.wikipedia.org/wiki/Dat
 
 networks = {'eth0'} -- add your devices network interface here netwidget, only shows first one thats up.
 
+-----------------------
+-- load personal.lua --
+-----------------------
 require_safe('personal')
 
 -- Create personal.lua in this same directory to override these defaults
@@ -54,7 +61,10 @@ require_safe('personal')
 -- }}}
 
 -- {{{ Variable definitions
-local wallpaper_cmd = "find " .. wallpaper_dir .. " -type f -name '*.jpg'  -print0 | shuf -n1 -z | xargs -0 feh --bg-scale"
+local wallpaper_cmd = "find " .. wallpaper_dir ..
+  " -type f \\( -name '*.jpg' -o -name '*.png' \\) -print0 | " ..
+  "shuf -n1 -z | xargs -0 feh --bg-scale --no-fehbg"
+
 local home   = os.getenv("HOME")
 local exec   = awful.util.spawn
 local sexec  = awful.util.spawn_with_shell
@@ -67,44 +77,27 @@ layouts = {
   awful.layout.suit.tile,
   awful.layout.suit.tile.bottom,
   awful.layout.suit.tile.top,
-  --awful.layout.suit.fair,
+  awful.layout.suit.fair,  -- default comment out
   awful.layout.suit.max,
   awful.layout.suit.magnifier,
-  --awful.layout.suit.floating
+  awful.layout.suit.floating -- default comment out
 }
 -- }}}
 
 -- {{{ Tags
+----------
+-- Tags --
+----------
+tags = {
+  names  = { "☆", "✍", "☁", "✐", "♪", '✆', '✇', '☺', '✉' },
+  layout = { layouts[5], layouts[5], layouts[5], layouts[4], layouts[5],
+             layouts[6], layouts[7], layouts[6], layouts[5]
+}}
 
--- Taglist numerals
-taglist_numbers_langs = { 'arabic', 'chinese', 'traditional_chinese', 'east_arabic', 'persian_arabic', }
-taglist_numbers_sets = {
-	arabic={ 1, 2, 3, 4, 5, 6, 7, 8, 9 },
-	chinese={"一", "二", "三", "四", "五", "六", "七", "八", "九", "十"},
-	traditional_chinese={"壹", "貳", "叄", "肆", "伍", "陸", "柒", "捌", "玖", "拾"},
-	east_arabic={'١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'}, -- '٠' 0
-	persian_arabic={'٠', '١', '٢', '٣', '۴', '۵', '۶', '٧', '٨', '٩'},
-	roman={'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'},
-	thai={'๑', '๒', '๓', '๔', '๕', '๖', '๗', '๘', '๙', '๑๐'},
-}
--- }}}
-
-tags = {}
 for s = 1, screen.count() do
-    -- Each screen has its own tag table.
-      --tags[s] = awful.tag({"一", "二", "三", "四", "五", "六", "七", "八", "九", "十"}, s, layouts[1])
-      --tags[s] = awful.tag(taglist_numbers_sets[taglist_numbers], s, layouts[1])
-	if taglist_numbers == 'random' then
-		math.randomseed(os.time())
-		local taglist = taglist_numbers_sets[taglist_numbers_langs[math.random(table.getn(taglist_numbers_langs))]]
-		tags[s] = awful.tag(taglist, s, layouts[1])
-	else
-		tags[s] = awful.tag(taglist_numbers_sets[taglist_numbers], s, layouts[1])
-	end
-    --tags[s] = awful.tag({ 1, 2, 3, 4, 5, 6, 7, 8, 9 }, s, layouts[1])
+  -- Each screen has its own tag table.
+  tags[s] = awful.tag(tags.names, s, tags.layout)
 end
--- }}}
-
 
 -- {{{ Wibox
 --
@@ -141,25 +134,28 @@ if cpugraph_enable then
 	})
 
 	-- Register graph widget
-	vicious.register(cpugraph,  vicious.widgets.cpu,      "$1")
+	vicious.register(cpugraph,  vicious.widgets.cpu, "$1")
 end
 
 -- cpu text widget
 cpuwidget = wibox.widget.textbox() -- initialize
 vicious.register(cpuwidget, vicious.widgets.cpu, cputext_format, 3) -- register
 
--- temperature
-tzswidget = wibox.widget.textbox()
-vicious.register(tzswidget, vicious.widgets.thermal,
-	function (widget, args)
-		if args[1] > 0 then
-			tzfound = true
-			return " " .. args[1] .. "C°"
-		else return "" 
-		end
-	end
-	, 19, "thermal_zone0")
 
+
+-- temperature
+-- Comment out... How to use this? acpitool??
+-- lm-sensors service???
+-- tzswidget = wibox.widget.textbox()
+-- vicious.register(tzswidget, vicious.widgets.thermal,
+--                  function (widget, args)
+--                    if args[1] > 0 then
+--                      tzfound = true
+--                      return " " .. args[1] .. "C°"
+--                    else return ""
+--                    end
+--                  end
+--                  , 19, "thermal_zone0")
 -- }}}
 
 
@@ -242,34 +238,6 @@ vicious.register(fs.r, vicious.widgets.fs, "${/ used_p}",            599)
 vicious.register(fs.s, vicious.widgets.fs, "${/media/files used_p}", 599)
 -- }}}
 
--- {{{ Network usage
-function print_net(name, down, up)
-	return '<span color="'
-	.. beautiful.fg_netdn_widget ..'">' .. down .. '</span> <span color="'
-	.. beautiful.fg_netup_widget ..'">' .. up  .. '</span>'
-end
-
-dnicon = wibox.widget.imagebox()
-upicon = wibox.widget.imagebox()
-
--- Initialize widget
-netwidget = wibox.widget.textbox()
--- Register widget
-vicious.register(netwidget, vicious.widgets.net,
-	function (widget, args)
-		for _,device in pairs(networks) do
-			if tonumber(args["{".. device .." carrier}"]) > 0 then
-				netwidget.found = true
-				dnicon:set_image(beautiful.widget_net)
-				upicon:set_image(beautiful.widget_netup)
-				return print_net(device, args["{"..device .." down_kb}"], args["{"..device.." up_kb}"])
-			end
-		end
-	end, 3)
--- }}}
-
-
-
 -- {{{ Volume level
 volicon = wibox.widget.imagebox()
 volicon:set_image(beautiful.widget_vol)
@@ -316,9 +284,9 @@ if whereis_app('curl') and whereis_app('mpd') then
 	vicious.register(mpdwidget, vicious.widgets.mpd,
 		function (widget, args)
 			if args["{state}"] == "Stop" or args["{state}"] == "Pause" or args["{state}"] == "N/A"
-				or (args["{Artist}"] == "N/A" and args["{Title}"] == "N/A") then return ""
+      or (args["{Artist}"] == "N/A" and args["{Title}"] == "N/A") then return ""
 			else return '<span color="white">музыка:</span> '..
-			     args["{Artist}"]..' - '.. args["{Title}"]
+          args["{Artist}"]..' - '.. args["{Title}"]
 			end
 		end
 	)
@@ -370,7 +338,7 @@ for s = 1, screen.count() do
     })
     -- Add widgets to the wibox
     mywibox[s].widgets = {
-        {   taglist[s], layoutbox[s], separator, 
+        {   taglist[s], layoutbox[s], separator,
             mpdwidget and spacer, mpdwidget or nil,
         },
         --s == screen.count() and systray or nil, -- show tray on last screen
@@ -379,14 +347,14 @@ for s = 1, screen.count() do
         datewidget, dateicon,
         baticon.image and separator, batwidget, baticon or nil,
         separator, volwidget,  volbar.widget, volicon,
-        dnicon.image and separator, upicon, netwidget, dnicon or nil,
+        -- Network:
+        -- dnicon.image and separator, upicon, netwidget, dnicon or nil,
+        -- end network
         separator, fs.r.widget, fs.s.widget, fsicon,
         separator, memtext, membar_enable and membar.widget or nil, memicon,
         separator, tzfound and tzswidget or nil,
         cpugraph_enable and cpugraph.widget or nil, cpuwidget, cpuicon,
     }
-
-
 
   local left_layout = wibox.layout.fixed.horizontal()
   left_layout:fill_space(true)
@@ -412,7 +380,7 @@ for s = 1, screen.count() do
     right_layout:add(tzswidget)
   end
 
-  
+
   if membar_enable and memtext and membar then
     if separator then right_layout:add(separator) end
     right_layout:add(memicon)
@@ -495,34 +463,46 @@ globalkeys = awful.util.table.join(
     awful.key({ modkey,           }, "Right",  awful.tag.viewnext       ),
     awful.key({ modkey,           }, "Escape", awful.tag.history.restore),
 
-    awful.key({ modkey,           }, "j",
-        function ()
-            awful.client.focus.byidx( 1)
-            if client.focus then client.focus:raise() end
-        end),
-    awful.key({ modkey,           }, "k",
-        function ()
-            awful.client.focus.byidx(-1)
-            if client.focus then client.focus:raise() end
-        end),
-    awful.key({ modkey,           }, "w", function () mymainmenu:show({keygrabber=true}) end),
+    awful.key({ modkey,           }, "j", function ()
+        awful.client.focus.byidx( 1)
+        if client.focus then client.focus:raise() end
+    end),
+    awful.key({ modkey,           }, "k", function ()
+        awful.client.focus.byidx(-1)
+        if client.focus then client.focus:raise() end
+    end),
+    awful.key({ modkey,           }, "w", function ()
+        mymainmenu:show({keygrabber=true})
+    end),
 
     -- Layout manipulation
-    awful.key({ modkey, "Shift"   }, "j", function () awful.client.swap.byidx(  1)    end),
-    awful.key({ modkey, "Shift"   }, "k", function () awful.client.swap.byidx( -1)    end),
-    awful.key({ modkey, "Control" }, "j", function () awful.screen.focus_relative( 1) end),
-    awful.key({ modkey, "Control" }, "k", function () awful.screen.focus_relative(-1) end),
+    awful.key({ modkey, "Shift"   }, "j", function ()
+        awful.client.swap.byidx(  1)
+    end),
+    awful.key({ modkey, "Shift"   }, "k", function ()
+        awful.client.swap.byidx( -1)
+    end),
+    awful.key({ modkey, "Control" }, "j", function ()
+        awful.screen.focus_relative( 1)
+    end),
+    awful.key({ modkey, "Control" }, "k", function ()
+        awful.screen.focus_relative(-1)
+    end),
     awful.key({ modkey,           }, "u", awful.client.urgent.jumpto),
-    awful.key({ modkey,           }, "Tab",
-        function ()
-            awful.client.focus.history.previous()
-            if client.focus then
-                client.focus:raise()
-            end
-        end),
+    awful.key({ modkey,           }, "Tab", function ()
+        awful.client.focus.history.previous()
+        if client.focus then
+          client.focus:raise()
+        end
+    end),
 
     -- Standard program
-    awful.key({ modkey, "Shift"   }, "Return", function () awful.util.spawn(terminal) end),
+    awful.key({ modkey, "Shift"   }, "Return", function ()
+        awful.util.spawn(terminal)
+    end),
+    awful.key({ modkey, "Control"   }, "t", function ()
+        awful.util.spawn(terminal)
+    end),
     awful.key({ modkey, "Control" }, "r", awesome.restart),
     awful.key({ modkey, "Shift"   }, "q", awesome.quit),
 
@@ -535,12 +515,8 @@ globalkeys = awful.util.table.join(
     awful.key({ modkey,           }, "space", function () awful.layout.inc(layouts,  1) end),
     awful.key({ modkey, "Shift"   }, "space", function () awful.layout.inc(layouts, -1) end),
 
-    awful.key({ modkey }, "b", function ()
-         wibox[mouse.screen].visible = not wibox[mouse.screen].visible
-    end),
-
     -- Prompt
-    awful.key({ modkey },            "r",     function () mypromptbox[mouse.screen]:run() end),
+    awful.key({ modkey }, "r", function () menubar.show() end),
 
     awful.key({ modkey }, "x",
               function ()
@@ -548,7 +524,11 @@ globalkeys = awful.util.table.join(
                   mypromptbox[mouse.screen].widget,
                   awful.util.eval, nil,
                   awful.util.getdir("cache") .. "/history_eval")
-              end)
+    end),
+    -- wibox
+    awful.key({ modkey }, "b", function ()
+        mywibox[mouse.screen].visible = not mywibox[mouse.screen].visible
+    end)
 )
 
 clientkeys = awful.util.table.join(
@@ -626,10 +606,19 @@ awful.rules.rules = {
       border_width = beautiful.border_width,
       border_color = beautiful.border_normal }
     },
+    { rule = { class = "Emacs" },
+      properties = { tag = tags[1][1]} },
+    { rule = { class = "Firefox" },
+      properties = { tag = tags[1][3], opacity = 1.0 } },
+    { rule = { class = "Gimp" },
+      properties = { tag = tags[1][4], floating = true} },
+    { rule = { class = "Mplayer" },
+      properties = { tag = tags[1][5], floating = true} },
+    { rule = { class = "Skype" },
+      properties = { tag = tags[1][6], floating = true, opacity = 0.7 } },
     { rule = { class = "ROX-Filer" },   properties = { floating = true } },
     { rule = { class = "Chromium-browser" },   properties = { floating = false } },
     { rule = { class = "Google-chrome" },   properties = { floating = false } },
-    { rule = { class = "Firefox" },   properties = { floating = false } },
 }
 -- }}}
 
@@ -686,29 +675,28 @@ end
 -- }}}
 -- }}}
 
-x = 0
-
--- setup the timer
-mytimer = timer { timeout = x }
-mytimer:connect_signal("timeout", function()
-
-  -- tell awsetbg to randomly choose a wallpaper from your wallpaper directory
-  if file_exists(wallpaper_dir) and whereis_app('feh') then
-	  os.execute(wallpaper_cmd)
-  end
-  -- stop the timer (we don't need multiple instances running at the same time)
-  mytimer:stop()
-
-  -- define the interval in which the next wallpaper change should occur in seconds
-  -- (in this case anytime between 10 and 20 minutes)
-  x = math.random( 600, 1200)
-
-  --restart the timer
-  mytimer.timeout = x
+-----------------------
+-- change background --
+-----------------------
+if whereis_app('feh') then
+  mytimer = timer { timeout = 0 }
+  mytimer:connect_signal("timeout",
+                         function()
+                           -- tell awsetbg to randomly choose a wallpaper from your wallpaper directory
+                           if file_exists(wallpaper_dir) then
+                             os.execute(wallpaper_cmd)
+                           end
+                           -- stop the timer (we don't need multiple instances running at the same time)
+                           mytimer:stop()
+                           -- define the interval in which the next wallpaper change should occur in seconds
+                           -- (in this case anytime between 10 and 20 minutes)
+                           x = math.random(600, 1200)
+                           --restart the timer
+                           mytimer.timeout = x
+                           mytimer:start()
+                         end)
+  -- initial start when rc.lua is first run
   mytimer:start()
-end)
-
--- initial start when rc.lua is first run
-mytimer:start()
+end
 
 require_safe('autorun')
